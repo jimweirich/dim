@@ -1,8 +1,6 @@
 require 'dim'
 require 'rspec/given'
 
-# TODO: use rspec-given
-
 class ConsoleAppender
 end
 

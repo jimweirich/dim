@@ -15,4 +15,3 @@ details).
 
 Read [this](http://onestepback.org/articles/depinj/appendixa.html) for
 more information about using DIM.
-

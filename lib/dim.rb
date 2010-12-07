@@ -17,7 +17,7 @@
 #
 #   require 'dim'
 #
-#   container = DIM::Container.new
+#   container = Dim::Container.new
 #   container.register(:log_file) { "logfile.log" }
 #   container.register(:logger) { |c| FileLogger.new(c.log_file) }
 #   container.register(:application) { |c|
@@ -28,20 +28,22 @@
 #
 #   c.application.run
 #
-module DIM
+module Dim
   # Thrown when a service cannot be located by name.
   class MissingServiceError < StandardError; end
 
   # Thrown when a duplicate service is registered.
   class DuplicateServiceError < StandardError; end
 
-  # DIM::Container is the central data store for registering services
+  # Dim::Container is the central data store for registering services
   # used for dependency injuction.  Users register services by
   # providing a name and a block used to create the service.  Services
   # may be retrieved by asking for them by name (via the [] operator)
   # or by selector (via the method_missing technique).
   #
   class Container
+    attr_reader :parent
+
     # Create a dependency injection container.  Specify a parent
     # container to use as a fallback for service lookup.
     def initialize(parent=nil)

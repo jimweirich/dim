@@ -28,25 +28,25 @@ end
 describe Dim::Container do
   let(:container) { Dim::Container.new }
 
-  context "creating objects" do
+  Scenario "creating objects" do
     Given { container.register(:app) { App.new } }
     Then  { container.app.should be_a(App) }
   end
 
-  context "returning the same object every time" do
+  Scenario "returning the same object every time" do
     Given { container.register(:app) { App.new } }
     Given(:app)  { container.app }
     Then { container.app.should be(app) }
   end
 
-  context "contructing dependent objects" do
+  Scenario "contructing dependent objects" do
     Given { container.register(:app) { |c| App.new(c.logger) } }
     Given { container.register(:logger) { Logger.new } }
     Given(:app) { container.app }
     Then { app.logger.should be(container.logger) }
   end
 
-  context "constructing dependent objects with setters" do
+  Scenario "constructing dependent objects with setters" do
     Given {
       container.register(:app) { |c|
         App.new.tap { |obj|
@@ -60,7 +60,7 @@ describe Dim::Container do
     Then { app.db.should be(container.database) }
   end
 
-  context "constructing multiple dependent objects" do
+  Scenario "constructing multiple dependent objects" do
     Given {
       container.register(:app) { |c|
         App.new(c.logger).tap { |obj|
@@ -75,7 +75,7 @@ describe Dim::Container do
     Then { app.db.should be(container.database) }
   end
 
-  context "constructing chains of dependencies" do
+  Scenario "constructing chains of dependencies" do
     Given { container.register(:app) { |c| App.new(c.logger) } }
     Given {
       container.register(:logger) { |c|
@@ -91,66 +91,72 @@ describe Dim::Container do
     Then { logger.appender.should be(container.logger_appender) }
   end
 
-  context "constructing literals" do
+  Scenario "constructing literals" do
     Given { container.register(:database) { |c| RealDB.new(c.username, c.userpassword) } }
-    Given { container.register(:username) { "jim" } }
-    Given { container.register(:userpassword) { "secret" } }
+    Given { container.register(:username) { "user_name_value" } }
+    Given { container.register(:userpassword) { "password_value" } }
     Given(:db) { container.database }
 
-    Then { db.username.should == "jim" }
-    Then { db.password.should == "secret" }
+    Then { db.username.should == "user_name_value" }
+    Then { db.password.should == "password_value" }
   end
 
-  context "missing services" do
-    Then {
-      lambda {
-        container.not_here
-      }.should raise_error(Dim::MissingServiceError, /not_here/)
-    }
+  describe "Errors" do
+    Scenario "missing services" do
+      Then {
+        lambda {
+          container.undefined_service_name
+        }.should raise_error(Dim::MissingServiceError, /undefined_service_name/)
+      }
+    end
+
+    Scenario "duplicate service names" do
+      Given { container.register(:duplicate_name) { 0 } }
+      Then {
+        lambda {
+          container.register(:duplicate_name) { 0 }
+        }.should raise_error(Dim::DuplicateServiceError, /duplicate_name/)
+      }
+    end
   end
 
-  context "duplicate service names" do
-    Given { container.register(:app) { 0 } }
-    Then {
-      lambda {
-        container.register(:app) { 0 }
-      }.should raise_error(Dim::DuplicateServiceError, /app/)
-    }
-  end
+  describe "Parent/Child Container Interaction" do
+    Given(:parent) { container }
+    Given(:child) { Dim::Container.new(parent) }
 
-  describe "Child Containers" do
-    Given(:child) { Dim::Container.new(container) }
-    Given(:other_child) { Dim::Container.new(container) }
-
-    Given { container.register(:cell) { :parent_cell } }
-    Given { container.register(:gene) { :parent_gene } }
+    Given { parent.register(:cell) { :parent_cell } }
+    Given { parent.register(:gene) { :parent_gene } }
     Given { child.register(:gene) { :child_gene } }
-    Given { other_child.register(:gene) { :other_child_gene } }
 
-    context "reusing a service from the parent" do
+    Scenario "reusing a service from the parent" do
       Then { child.cell.should == :parent_cell }
     end
 
-    context "overiding a service from the parent" do
-      Then { child.gene.should == :child_gene }
+    Scenario "overiding a service from the parent" do
+      Then "the child service overrides the parent" do
+        child.gene.should == :child_gene
+      end
     end
 
-    context "wrapping a service from a parent" do
+    Scenario "wrapping a service from a parent" do
       Given { child.register(:cell) { |c| [c.parent.cell] } }
       Then { child.cell.should == [:parent_cell] }
     end
 
-    context "overriding an indirect dependency" do
-      Given { container.register(:wrapped_cell) { |c| [c.cell] } }
+    Scenario "overriding an indirect dependency" do
+      Given { parent.register(:wrapped_cell) { |c| [c.cell] } }
       Given { child.register(:cell) { :child_cell } }
       Then { child.wrapped_cell.should == [:child_cell] }
     end
 
-    context "parent / child service conflicts" do
-      Then { container.gene.should == :parent_gene }
+    Scenario "parent / child service conflicts from parents view" do
+      Then { parent.gene.should == :parent_gene }
     end
 
-    context "child / child service name conflicts" do
+    Scenario "child / child service name conflicts" do
+      Given(:other_child) { Dim::Container.new(parent) }
+      Given { other_child.register(:gene) { :other_child_gene } }
+
       Then { child.gene.should == :child_gene }
       Then { other_child.gene.should == :other_child_gene }
     end

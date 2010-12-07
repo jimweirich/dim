@@ -50,20 +50,21 @@ describe DIM::Container do
 
   it "constructs dependent objects with setters" do
     container.register(:app) { |c|
-      app = App.new
-      app.db = c.database
-      app
+      App.new.tap { |obj|
+        obj.db = c.database
+      }
     }
     container.register(:database) { MockDB.new }
+
     app = container.app
     app.db.should be(container.database)
   end
 
   it "constructs multiple dependent objects" do
     container.register(:app) { |c|
-      app = App.new(c.logger)
-      app.db = c.database
-      app
+      App.new(c.logger).tap { |obj|
+        obj.db = c.database
+      }
     }
     container.register(:logger) { Logger.new }
     container.register(:database) { MockDB.new }
@@ -76,9 +77,9 @@ describe DIM::Container do
   it "constructs chains of dependencies" do
     container.register(:app) { |c| App.new(c.logger) }
     container.register(:logger) { |c|
-      log = Logger.new
-      log.appender = c.logger_appender
-      log
+      Logger.new.tap { |obj|
+        obj.appender = c.logger_appender
+      }
     }
     container.register(:logger_appender) { ConsoleAppender.new }
     container.register(:database) { MockDB.new }

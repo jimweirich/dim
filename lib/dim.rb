@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
 #--
-# Copyright 2004, 2005 by Jim Weirich (jim@weirichhouse.org).
+# Copyright 2004, 2005, 2010 by Jim Weirich (jim.weirich@gmail.com).
 # All rights reserved.
 #
-# Permission is granted for use, copying, modification, distribution,
-# and distribution of modified versions of this work as long as the
-# above copyright notice is included.
+# This software is available under the MIT license.  See the
+# MIT-LICENSE file for details.
 #++
 #
 # = Dependency Injection - Minimal (DIM)

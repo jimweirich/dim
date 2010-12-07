@@ -119,48 +119,40 @@ describe Dim::Container do
   end
 
   describe "Child Containers" do
-    let(:child) { Dim::Container.new(container) }
+    Given(:child) { Dim::Container.new(container) }
+    Given(:other_child) { Dim::Container.new(container) }
+
+    Given { container.register(:cell) { :parent_cell } }
+    Given { container.register(:gene) { :parent_gene } }
+    Given { child.register(:gene) { :child_gene } }
+    Given { other_child.register(:gene) { :other_child_gene } }
 
     context "reusing a service from the parent" do
-      Given { container.register(:gene) { :x } }
-      Then { child.gene.should == :x }
+      Then { child.cell.should == :parent_cell }
     end
 
     context "overiding a service from the parent" do
-      Given { container.register(:gene) { :x } }
-      Given { child.register(:gene) { :y } }
-      Then { child.gene.should == :y }
+      Then { child.gene.should == :child_gene }
     end
 
     context "wrapping a service from a parent" do
-      Given { container.register(:gene) { :x } }
-      Given { child.register(:gene) { |c| [c.parent.gene] } }
-      Then { child.gene.should == [:x] }
+      Given { child.register(:cell) { |c| [c.parent.cell] } }
+      Then { child.cell.should == [:parent_cell] }
     end
 
     context "overriding an indirect dependency" do
-      Given { container.register(:thing) { |c| c.real_thing } }
-      Given { container.register(:real_thing) { "THING" } }
-      Given { child.register(:real_thing) { "NEWTHING" } }
-      Then { child.thing.should == "NEWTHING" }
+      Given { container.register(:wrapped_cell) { |c| [c.cell] } }
+      Given { child.register(:cell) { :child_cell } }
+      Then { child.wrapped_cell.should == [:child_cell] }
     end
 
     context "parent / child service conflicts" do
-      Given { container.register(:gene) { :x } }
-      Given { child.register(:gene) { :y } }
-      Then { container.gene.should == :x }
+      Then { container.gene.should == :parent_gene }
     end
 
     context "child / child service name conflicts" do
-      Given(:a) { Dim::Container.new(container) }
-      Given(:b) { Dim::Container.new(container) }
-
-      Given { container.register(:gene) { :x } }
-      Given { a.register(:gene) { :a } }
-      Given { b.register(:gene) { :b } }
-
-      Then { a.gene.should == :a }
-      Then { b.gene.should == :b }
+      Then { child.gene.should == :child_gene }
+      Then { other_child.gene.should == :other_child_gene }
     end
   end
 

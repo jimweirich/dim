@@ -1,6 +1,6 @@
 require 'dim'
+require 'rspec/given'
 
-# TODO: use tap
 # TODO: use rspec-given
 
 class ConsoleAppender
@@ -30,74 +30,77 @@ end
 describe DIM::Container do
   let(:container) { DIM::Container.new }
 
-  it "can create objects" do
-    container.register(:app) { App.new }
-    container.app.should be_a(App)
+  context "can create objects" do
+    Given { container.register(:app) { App.new } }
+    Then  { container.app.should be_a(App) }
   end
 
-  it "returns the same object every time" do
-    container.register(:app) { App.new }
-    app = container.app
-    container.app.should be(app)
+  context "returns the same object every time" do
+    Given { container.register(:app) { App.new } }
+    Given(:app)  { container.app }
+    Then { container.app.should be(app) }
   end
 
-  it "contructs dependent objects" do
-    container.register(:app) { |c| App.new(c.logger) }
-    container.register(:logger) { Logger.new }
-    app = container.app
-    app.logger.should be(container.logger)
+  context "contructs dependent objects" do
+    Given { container.register(:app) { |c| App.new(c.logger) } }
+    Given { container.register(:logger) { Logger.new } }
+    Given(:app) { container.app }
+    Then { app.logger.should be(container.logger) }
   end
 
-  it "constructs dependent objects with setters" do
-    container.register(:app) { |c|
-      App.new.tap { |obj|
-        obj.db = c.database
+  context "constructs dependent objects with setters" do
+    Given {
+      container.register(:app) { |c|
+        App.new.tap { |obj|
+          obj.db = c.database
+        }
       }
     }
-    container.register(:database) { MockDB.new }
+    Given { container.register(:database) { MockDB.new } }
+    Given(:app) { container.app }
 
-    app = container.app
-    app.db.should be(container.database)
+    Then { app.db.should be(container.database) }
   end
 
-  it "constructs multiple dependent objects" do
-    container.register(:app) { |c|
-      App.new(c.logger).tap { |obj|
-        obj.db = c.database
+  context "constructs multiple dependent objects" do
+    Given {
+      container.register(:app) { |c|
+        App.new(c.logger).tap { |obj|
+          obj.db = c.database
+        }
       }
     }
-    container.register(:logger) { Logger.new }
-    container.register(:database) { MockDB.new }
-
-    app = container.app
-    app.logger.should be(container.logger)
-    app.db.should be(container.database)
+    Given { container.register(:logger) { Logger.new } }
+    Given { container.register(:database) { MockDB.new } }
+    Given(:app) { container.app }
+    Then { app.logger.should be(container.logger) }
+    Then { app.db.should be(container.database) }
   end
 
-  it "constructs chains of dependencies" do
-    container.register(:app) { |c| App.new(c.logger) }
-    container.register(:logger) { |c|
-      Logger.new.tap { |obj|
-        obj.appender = c.logger_appender
+  context "constructs chains of dependencies" do
+    Given { container.register(:app) { |c| App.new(c.logger) } }
+    Given {
+      container.register(:logger) { |c|
+        Logger.new.tap { |obj|
+          obj.appender = c.logger_appender
+        }
       }
     }
-    container.register(:logger_appender) { ConsoleAppender.new }
-    container.register(:database) { MockDB.new }
+    Given { container.register(:logger_appender) { ConsoleAppender.new } }
+    Given { container.register(:database) { MockDB.new } }
+    Given(:logger) { container.app.logger }
 
-    app = container.app
-    logger = app.logger
-
-    logger.appender.should be(container.logger_appender)
+    Then { logger.appender.should be(container.logger_appender) }
   end
 
-  it "constructs literals" do
-    container.register(:database) { |c| RealDB.new(c.username, c.userpassword) }
-    container.register(:username) { "jim" }
-    container.register(:userpassword) { "secret" }
+  context "constructs literals" do
+    Given { container.register(:database) { |c| RealDB.new(c.username, c.userpassword) } }
+    Given { container.register(:username) { "jim" } }
+    Given { container.register(:userpassword) { "secret" } }
+    Given(:db) { container.database }
 
-    db = container.database
-    db.username.should == "jim"
-    db.password.should == "secret"
+    Then { db.username.should == "jim" }
+    Then { db.password.should == "secret" }
   end
 
   it "complains about missing services" do
@@ -116,43 +119,40 @@ describe DIM::Container do
   describe "Child Containers" do
     let(:child) { DIM::Container.new(container) }
 
-    it "reuses a service from the parent" do
-      container.register(:gene) { :x }
-
-      child.gene.should == :x
+    context "reuses a service from the parent" do
+      Given { container.register(:gene) { :x } }
+      Then { child.gene.should == :x }
     end
 
-    it "can overide a servie from the parent" do
-      container.register(:gene) { :x }
-      child.register(:gene) { :y }
-
-      child.gene.should == :y
+    context "can overide a servie from the parent" do
+      Given { container.register(:gene) { :x } }
+      Given { child.register(:gene) { :y } }
+      Then { child.gene.should == :y }
     end
 
-    it "can override an indirect dependency" do
-      container.register(:thing) { |c| c.real_thing }
-      container.register(:real_thing) { "THING" }
-      child.register(:real_thing) { "NEWTHING" }
-
-      child.thing.should == "NEWTHING"
+    context "can override an indirect dependency" do
+      Given { container.register(:thing) { |c| c.real_thing } }
+      Given { container.register(:real_thing) { "THING" } }
+      Given { child.register(:real_thing) { "NEWTHING" } }
+      Then { child.thing.should == "NEWTHING" }
     end
 
-    specify "the parent is uneffected by child registrations" do
-      container.register(:gene) { :x }
-      child.register(:gene) { :y }
-
-      container.gene.should == :x
+    context "the parent is uneffected by child registrations" do
+      Given { container.register(:gene) { :x } }
+      Given { child.register(:gene) { :y } }
+      Then { container.gene.should == :x }
     end
 
-    specify "multiple children do not interer with each other" do
-      container.register(:gene) { :x }
-      a = DIM::Container.new(container)
-      b = DIM::Container.new(container)
-      a.register(:gene) { :a }
-      b.register(:gene) { :b }
+    context "multiple children do not interer with each other" do
+      Given(:a) { DIM::Container.new(container) }
+      Given(:b) { DIM::Container.new(container) }
 
-      a.gene.should == :a
-      b.gene.should == :b
+      Given { container.register(:gene) { :x } }
+      Given { a.register(:gene) { :a } }
+      Given { b.register(:gene) { :b } }
+
+      Then { a.gene.should == :a }
+      Then { b.gene.should == :b }
     end
   end
 

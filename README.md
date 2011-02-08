@@ -1,10 +1,9 @@
 # DIM: Dependency Injection - Minimal
 
-DIM is my minimalistic dependency injection framework.  I don't
-currently plan to offer it as a gem, but several people have asked
-about the source code.  Previously it existed only as a
-([page](http://onestepback.org/articles/depinj/dim/dim_rb.html)) in my
-Dependency Injection presentation slides.
+DIM is Jim Weirich's minimalistic dependency injection framework,
+maintained in Gem form by [Mike Subelsky](http://subelsky.com).
+For more background information, read Jim's [Dependency Injection](http://onestepback.org/articles/depinj/dim/dim_rb.html))
+slides.
 
 # License
 

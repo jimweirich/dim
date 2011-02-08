@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.5.0}
   s.summary = %q{Minimalistic dependency injection framework}
+  s.description = %q{Minimalistic dependency injection framework}
   s.test_files = `git ls-files spec`.split("\n")
   s.add_development_dependency 'rspec'
 end

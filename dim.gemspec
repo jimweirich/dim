@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
   s.description = %q{Minimalistic dependency injection framework}
   s.test_files = `git ls-files spec`.split("\n")
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec-given'
 end

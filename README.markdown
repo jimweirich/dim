@@ -10,7 +10,9 @@ the container to provide it (using lazily-evaluated code blocks).
 When testing your code, you can either stub out services on the container, or you can provide a substitute container.
 
 ## Example
-    # this could be in a "lib.init.rb" file or in a Rails app, "config/initializers/container.rb"
+
+The following could be in a "lib.init.rb" file or in a Rails app, "config/initializers/container.rb":
+
     require "dim"
     require "logger"
     require 'game'
@@ -52,12 +54,16 @@ When testing your code, you can either stub out services on the container, or yo
       Logger.new(c.log_file_path)
     end
 
-    # Elsewhere in the app, when you want a reference to the app's logger object:
+Using the above code elsewhere in the app, when you want a reference to the app's logger object:
+
     ServerContainer.logger.info("I didn't have to setup my own logger")
+
+Or if you wanted access to the game instance created during setup (which already is configured with everything it needs):
+
     current_game = ServerContainer.game
 
-    # if you don't like creating even the one dependency on ServerContainer, you could 
-    # inject ServerContainer itself into your objects like so:
+If you don't like creating even the one dependency on the global constant ServerContainer, you could 
+inject ServerContainer itself into your objects like so:
     
     World.new(GameContainer)
     

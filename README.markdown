@@ -67,10 +67,11 @@ inject ServerContainer itself into your objects like so:
     
     World.new(GameContainer)
     
+## More Background
+
+Jim wrote a [nice article](http://onestepback.org/index.cgi/Tech/Ruby/DependencyInjectionInRuby.rdoc) explaining
+the rationale for this code and how it works. Also check out [his slides](http://onestepback.org/articles/depinj/).
+
 # License
 
 DIM is available under the MIT license (see the file MIT-LICENSE for details).
-
-# More Information:
-
-Read [this](http://onestepback.org/articles/depinj/appendixa.html) for more background about this code.

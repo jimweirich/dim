@@ -54,8 +54,9 @@ The following could be in a "lib.init.rb" file or in a Rails app, "config/initia
       Logger.new(c.log_file_path)
     end
 
-    # attempts to read ENV["API_PASSWORD"], returns "FAKE_PASSWORD" if it can't be found
-    ServerContainer.register_env(:api_password,"FAKE_PASSWORD")
+    # attempts to read ENV["API_PASSWORD"], otherwise makes sure that the parent container has
+    # a service named api_password registered
+    ServerContainer.register_env(:api_password)
 
 Using the above code elsewhere in the app, when you want a reference to the app's logger object:
 

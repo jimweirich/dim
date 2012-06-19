@@ -1,10 +1,10 @@
-#!/usr/bin/env ruby
 #--
-# Copyright 2004, 2005, 2010 by Jim Weirich (jim.weirich@gmail.com).
+# Copyright 2004, 2005, 2010, 2012 by Jim Weirich (jim.weirich@gmail.com)
+# and Mike Subelsky (mike@subelsky.com)
+#
 # All rights reserved.
 #
-# This software is available under the MIT license.  See the
-# MIT-LICENSE file for details.
+# This software is available under the MIT license.  See the LICENSE file for details.
 #++
 #
 # = Dependency Injection - Minimal (DIM)
@@ -64,11 +64,17 @@ module Dim
       @services[name] = block
     end
 
-    # Lookup a service from ENV variables; fall back to searching the provided hash
-    # if the
-    def register_env(name,default = nil)
-      value = ENV[name.to_s.upcase] || default || raise(EnvironmentVariableNotFound, "Cannot find any ENV variable named #{name}")
-      register(name) { value }
+    # Lookup a service from ENV variables; fall back to searching the container and its parents for a default value
+    def register_env(name)
+      if value = ENV[name.to_s.upcase]
+        register(name) { value }
+      else
+        begin
+          @parent.service_block(name)
+        rescue MissingServiceError
+          raise EnvironmentVariableNotFound, "Could not find an ENV variable named #{name.to_s.upcase} nor could we find a service named #{name} in the parent container"
+        end
+      end
     end
 
     # Lookup a service by name.  Throw an exception if no service is

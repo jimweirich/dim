@@ -1,5 +1,5 @@
 $:.unshift(File.dirname(__FILE__))
-require 'lib/dim/version'
+require 'lib/version'
 
 Gem::Specification.new do |s|
   s.name = %q{dim}

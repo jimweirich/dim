@@ -1,4 +1,5 @@
-#!/usr/bin/env ruby"
+#!/usr/bin/env rake
+require "bundler/gem_tasks"
 
 require 'rake/clean'
 require 'rake/testtask'

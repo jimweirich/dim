@@ -77,4 +77,4 @@ the rationale for this code and how it works. Also check out [his slides](http:/
 
 # License
 
-DIM is available under the MIT license (see the file MIT-LICENSE for details).
+Dim is available under the MIT license (see the file LICENSE for details).

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dim (0.9.1)
+    dim (1.0.0)
 
 GEM
   remote: http://rubygems.org/

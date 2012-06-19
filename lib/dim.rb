@@ -29,10 +29,13 @@
 #
 module Dim
   # Thrown when a service cannot be located by name.
-  class MissingServiceError < StandardError; end
+  MissingServiceError = Class.new(StandardError)
 
   # Thrown when a duplicate service is registered.
-  class DuplicateServiceError < StandardError; end
+  DuplicateServiceError = Class.new(StandardError)
+
+  # Thrown by register_env when a suitable ENV variable can't be found
+  EnvironmentVariableNotFound = Class.new(StandardError)
 
   # Dim::Container is the central data store for registering services
   # used for dependency injuction.  Users register services by
@@ -59,6 +62,13 @@ module Dim
         fail DuplicateServiceError, "Duplicate Service Name '#{name}'"
       end
       @services[name] = block
+    end
+
+    # Lookup a service from ENV variables; fall back to searching the provided hash
+    # if the
+    def register_env(name,default = nil)
+      value = ENV[name.to_s.upcase] || default || raise(EnvironmentVariableNotFound, "Cannot find any ENV variable named #{name}")
+      register(name) { value }
     end
 
     # Lookup a service by name.  Throw an exception if no service is

@@ -1,6 +1,6 @@
 # DIM: Dependency Injection - Minimal
 
-DIM is [Jim Weirich's](http://onestepback.org) minimalistic dependency injection framework, maintained in 
+DIM is [Jim Weirich's](http://onestepback.org) minimalistic dependency injection framework, maintained in
 gem form by [Mike Subelsky](http://subelsky.com).
 
 Dependency injection lets you organize all of your app's object setup code in one place by creating a
@@ -33,7 +33,7 @@ The following could be in a "lib.init.rb" file or in a Rails app, "config/initia
     ServerContainer.register(:listening_host) { "0.0.0.0" }
     ServerContainer.register(:listening_port) { "8080" }
 
-    ServerContainer.register(:game) do |c| 
+    ServerContainer.register(:game) do |c|
       game = Game.new
       game.logger = c.logger
       game.event_handler = c.event_handler
@@ -54,6 +54,9 @@ The following could be in a "lib.init.rb" file or in a Rails app, "config/initia
       Logger.new(c.log_file_path)
     end
 
+    # attempts to read ENV["API_PASSWORD"], returns "FAKE_PASSWORD" if it can't be found
+    ServerContainer.register_env(:api_password,"FAKE_PASSWORD")
+
 Using the above code elsewhere in the app, when you want a reference to the app's logger object:
 
     ServerContainer.logger.info("I didn't have to setup my own logger")
@@ -62,11 +65,11 @@ Or if you wanted access to the game instance created during setup (which already
 
     current_game = ServerContainer.game
 
-If you don't like creating even the one dependency on the global constant ServerContainer, you could 
+If you don't like creating even the one dependency on the global constant ServerContainer, you could
 inject ServerContainer itself into your objects like so:
-    
+
     World.new(GameContainer)
-    
+
 ## More Background
 
 Jim wrote a [nice article](http://onestepback.org/index.cgi/Tech/Ruby/DependencyInjectionInRuby.rdoc) explaining

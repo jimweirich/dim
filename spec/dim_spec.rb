@@ -162,4 +162,25 @@ describe Dim::Container do
     end
   end
 
+  describe "Registering env variables" do
+    Scenario "which exist in ENV" do
+      Given { ENV["SHAZ"] = "bot" }
+      Given { container.register_env(:shaz) }
+      Then  { container.shaz.should == "bot" }
+    end
+
+    Scenario "which exist in optional hash" do
+      Given { ENV["SHAZ"] = nil }
+      Given { container.register_env(:shaz,"test-bot") }
+      Then  { container.shaz.should == "test-bot" }
+    end
+
+    Scenario "which don't exist in optional hash" do
+      Then {
+        lambda {
+          container.register_env(:dont_exist_in_env_or_optional_hash)
+        }.should raise_error(Dim::EnvironmentVariableNotFound)
+      }
+    end
+  end
 end

@@ -97,6 +97,11 @@ module Dim
       @services[name] || @parent.service_block(name)
     end
 
+    # Resets the cached services
+    def clear_cache!
+      @cache = {}
+    end
+
     # Searching for a service block only reaches the Container class
     # when all the containers in the hierarchy search chain have no
     # entry for the service.  In this case, the only thing to do is

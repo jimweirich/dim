@@ -39,6 +39,14 @@ describe Dim::Container do
     Then { container.app.should be(app) }
   end
 
+  it "clears cache explicitly" do
+    container.register(:app) { App.new }
+    app_before = container.app
+    container.clear_cache!
+    app_after = container.app
+    app_before.should_not == app_after
+  end
+
   Scenario "contructing dependent objects" do
     Given { container.register(:app) { |c| App.new(c.logger) } }
     Given { container.register(:logger) { Logger.new } }

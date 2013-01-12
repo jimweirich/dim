@@ -62,6 +62,10 @@ module Dim
         fail DuplicateServiceError, "Duplicate Service Name '#{name}'"
       end
       @services[name] = block
+
+      self.class.send(:define_method, name) do
+        self[name]
+      end
     end
 
     # Lookup a service from ENV variables; fall back to searching the container and its parents for a default value

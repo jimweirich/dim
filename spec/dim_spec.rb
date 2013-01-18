@@ -28,25 +28,25 @@ end
 describe Dim::Container do
   let(:container) { Dim::Container.new }
 
-  Scenario "creating objects" do
+  context "creating objects" do
     Given { container.register(:app) { App.new } }
     Then  { container.app.should be_a(App) }
   end
 
-  Scenario "returning the same object every time" do
+  context "returning the same object every time" do
     Given { container.register(:app) { App.new } }
     Given(:app)  { container.app }
     Then { container.app.should be(app) }
   end
 
-  Scenario "contructing dependent objects" do
+  context "contructing dependent objects" do
     Given { container.register(:app) { |c| App.new(c.logger) } }
     Given { container.register(:logger) { Logger.new } }
     Given(:app) { container.app }
     Then { app.logger.should be(container.logger) }
   end
 
-  Scenario "constructing dependent objects with setters" do
+  context "constructing dependent objects with setters" do
     Given {
       container.register(:app) { |c|
         App.new.tap { |obj|
@@ -60,7 +60,7 @@ describe Dim::Container do
     Then { app.db.should be(container.database) }
   end
 
-  Scenario "constructing multiple dependent objects" do
+  context "constructing multiple dependent objects" do
     Given {
       container.register(:app) { |c|
         App.new(c.logger).tap { |obj|
@@ -75,7 +75,7 @@ describe Dim::Container do
     Then { app.db.should be(container.database) }
   end
 
-  Scenario "constructing chains of dependencies" do
+  context "constructing chains of dependencies" do
     Given { container.register(:app) { |c| App.new(c.logger) } }
     Given {
       container.register(:logger) { |c|
@@ -91,7 +91,7 @@ describe Dim::Container do
     Then { logger.appender.should be(container.logger_appender) }
   end
 
-  Scenario "constructing literals" do
+  context "constructing literals" do
     Given { container.register(:database) { |c| RealDB.new(c.username, c.userpassword) } }
     Given { container.register(:username) { "user_name_value" } }
     Given { container.register(:userpassword) { "password_value" } }
@@ -102,7 +102,7 @@ describe Dim::Container do
   end
 
   describe "Errors" do
-    Scenario "missing services" do
+    context "missing services" do
       Then {
         lambda {
           container.undefined_service_name
@@ -110,7 +110,7 @@ describe Dim::Container do
       }
     end
 
-    Scenario "duplicate service names" do
+    context "duplicate service names" do
       Given { container.register(:duplicate_name) { 0 } }
       Then {
         lambda {
@@ -128,32 +128,30 @@ describe Dim::Container do
     Given { parent.register(:gene) { :parent_gene } }
     Given { child.register(:gene) { :child_gene } }
 
-    Scenario "reusing a service from the parent" do
+    context "reusing a service from the parent" do
       Then { child.cell.should == :parent_cell }
     end
 
-    Scenario "overiding a service from the parent" do
-      Then "the child service overrides the parent" do
-        child.gene.should == :child_gene
-      end
+    context "overiding a service from the parent" do
+      Then { child.gene.should == :child_gene }
     end
 
-    Scenario "wrapping a service from a parent" do
+    context "wrapping a service from a parent" do
       Given { child.register(:cell) { |c| [c.parent.cell] } }
       Then { child.cell.should == [:parent_cell] }
     end
 
-    Scenario "overriding an indirect dependency" do
+    context "overriding an indirect dependency" do
       Given { parent.register(:wrapped_cell) { |c| [c.cell] } }
       Given { child.register(:cell) { :child_cell } }
       Then { child.wrapped_cell.should == [:child_cell] }
     end
 
-    Scenario "parent / child service conflicts from parents view" do
+    context "parent / child service conflicts from parents view" do
       Then { parent.gene.should == :parent_gene }
     end
 
-    Scenario "child / child service name conflicts" do
+    context "child / child service name conflicts" do
       Given(:other_child) { Dim::Container.new(parent) }
       Given { other_child.register(:gene) { :other_child_gene } }
 

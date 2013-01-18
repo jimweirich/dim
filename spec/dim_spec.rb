@@ -170,7 +170,7 @@ describe Dim::Container do
     context "which exist in ENV" do
       Given { ENV["SHAZ"] = "bot" }
       Given { container.register_env(:shaz) }
-      Then  { container.shaz.should == "bot" }
+      Then  { container.shaz == "bot" }
     end
 
     context "which exist in optional hash" do
@@ -180,15 +180,12 @@ describe Dim::Container do
 
       Given { ENV["FOO"] = nil }
       Given { child.register_env(:foo) }
-      Then  { container.foo.should == "bar" }
+      Then  { container.foo == "bar" }
     end
 
     context "which don't exist in optional hash" do
-      Then {
-        lambda {
-          container.register_env(:dont_exist_in_env_or_optional_hash)
-        }.should raise_error(Dim::EnvironmentVariableNotFound)
-      }
+      When(:result) { container.register_env(:dont_exist_in_env_or_optional_hash) }
+      Then { result == have_failed(Dim::EnvironmentVariableNotFound) }
     end
   end
 end

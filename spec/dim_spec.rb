@@ -41,6 +41,16 @@ describe Dim::Container do
     Then { container.app == app }
   end
 
+  describe "clearing the cache explicitly" do
+    Given!(:_) { container.register(:app) { App.new } }
+    Given!(:app_before) { container.app }
+    When(:app_after) {
+      container.clear_cache!
+      container.app
+    }
+    Then { app_before != app_after }
+  end
+
   context "when contructing dependent objects" do
     Given { container.register(:app) { |c| App.new(c.logger) } }
     Given { container.register(:logger) { Logger.new } }
@@ -156,4 +166,29 @@ describe Dim::Container do
     end
   end
 
+  describe "Registering env variables" do
+    context "which exist in ENV" do
+      Given { ENV["SHAZ"] = "bot" }
+      Given { container.register_env(:shaz) }
+      Then  { container.shaz.should == "bot" }
+    end
+
+    context "which exist in optional hash" do
+      Given(:parent) { container }
+      Given { parent.register(:foo) { "bar" } }
+      Given(:child) { Dim::Container.new(parent) }
+
+      Given { ENV["FOO"] = nil }
+      Given { child.register_env(:foo) }
+      Then  { container.foo.should == "bar" }
+    end
+
+    context "which don't exist in optional hash" do
+      Then {
+        lambda {
+          container.register_env(:dont_exist_in_env_or_optional_hash)
+        }.should raise_error(Dim::EnvironmentVariableNotFound)
+      }
+    end
+  end
 end

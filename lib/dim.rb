@@ -1,10 +1,10 @@
-#!/usr/bin/env ruby
 #--
-# Copyright 2004, 2005, 2010 by Jim Weirich (jim.weirich@gmail.com).
+# Copyright 2004, 2005, 2010, 2012 by Jim Weirich (jim.weirich@gmail.com)
+# and Mike Subelsky (mike@subelsky.com)
+#
 # All rights reserved.
 #
-# This software is available under the MIT license.  See the
-# MIT-LICENSE file for details.
+# This software is available under the MIT license.  See the LICENSE file for details.
 #++
 #
 # = Dependency Injection - Minimal (DIM)
@@ -29,10 +29,13 @@
 #
 module Dim
   # Thrown when a service cannot be located by name.
-  class MissingServiceError < StandardError; end
+  MissingServiceError = Class.new(StandardError)
 
   # Thrown when a duplicate service is registered.
-  class DuplicateServiceError < StandardError; end
+  DuplicateServiceError = Class.new(StandardError)
+
+  # Thrown by register_env when a suitable ENV variable can't be found
+  EnvironmentVariableNotFound = Class.new(StandardError)
 
   # Dim::Container is the central data store for registering services
   # used for dependency injuction.  Users register services by
@@ -59,6 +62,23 @@ module Dim
         fail DuplicateServiceError, "Duplicate Service Name '#{name}'"
       end
       @services[name] = block
+
+      self.class.send(:define_method, name) do
+        self[name]
+      end
+    end
+
+    # Lookup a service from ENV variables; fall back to searching the container and its parents for a default value
+    def register_env(name)
+      if value = ENV[name.to_s.upcase]
+        register(name) { value }
+      else
+        begin
+          @parent.service_block(name)
+        rescue MissingServiceError
+          raise EnvironmentVariableNotFound, "Could not find an ENV variable named #{name.to_s.upcase} nor could we find a service named #{name} in the parent container"
+        end
+      end
     end
 
     # Lookup a service by name.  Throw an exception if no service is
@@ -79,6 +99,11 @@ module Dim
     # found in the container or its parents.
     def service_block(name)
       @services[name] || @parent.service_block(name)
+    end
+
+    # Resets the cached services
+    def clear_cache!
+      @cache = {}
     end
 
     # Searching for a service block only reaches the Container class

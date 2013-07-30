@@ -68,15 +68,17 @@ module Dim
       end
     end
 
-    # Lookup a service from ENV variables; fall back to searching the container and its parents for a default value
-    def register_env(name)
+    # Lookup a service from ENV variables, or use a default if given; fall back to searching the container and its parents for a default value
+    def register_env(name,default = nil)
       if value = ENV[name.to_s.upcase]
         register(name) { value }
+      elsif default
+        register(name) { default }
       else
         begin
           @parent.service_block(name)
         rescue MissingServiceError
-          raise EnvironmentVariableNotFound, "Could not find an ENV variable named #{name.to_s.upcase} nor could we find a service named #{name} in the parent container"
+          raise EnvironmentVariableNotFound, "Could not find an ENV variable named '#{name.to_s.upcase}' nor could we find a service named #{name} in the parent container"
         end
       end
     end

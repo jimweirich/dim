@@ -177,7 +177,7 @@ describe Dim::Container do
       Then  { container.shaz.should == "bot" }
     end
 
-    Scenario "which exist in optional hash" do
+    Scenario "which only exist in parent" do
       Given(:parent) { container }
       Given { parent.register(:foo) { "bar" } }
       Given(:child) { Dim::Container.new(parent) }
@@ -185,6 +185,11 @@ describe Dim::Container do
       Given { ENV["FOO"] = nil }
       Given { child.register_env(:foo) }
       Then  { container.foo.should == "bar" }
+    end
+
+    Scenario "which don't exist in ENV but have a default" do
+      Given { container.register_env(:abc,"123") }
+      Then  { container.abc.should == "123" }
     end
 
     Scenario "which don't exist in optional hash" do

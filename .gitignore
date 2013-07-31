@@ -1,3 +1,4 @@
 .project_env.rc
 .togglerc
 *.gem
+Gemfile.lock

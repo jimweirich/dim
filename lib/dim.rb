@@ -57,8 +57,8 @@ module Dim
     # Register a service named +name+.  The +block+ will be used to
     # create the service on demand.  It is recommended that symbols be
     # used as the name of a service.
-    def register(name, &block)
-      if @services[name]
+    def register(name,raise_error_on_duplicate = true,&block)
+      if @services[name] && raise_error_on_duplicate
         fail DuplicateServiceError, "Duplicate Service Name '#{name}'"
       end
       @services[name] = block
@@ -66,6 +66,10 @@ module Dim
       self.class.send(:define_method, name) do
         self[name]
       end
+    end
+
+    def override(name,&block)
+      register(name,false,&block)
     end
 
     # Lookup a service from ENV variables, or use a default if given; fall back to searching the container and its parents for a default value

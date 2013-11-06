@@ -209,7 +209,11 @@ describe Dim::Container do
 
   Scenario "verifying dependencies" do
     Given { container.register(:app) { :app } }
-    Then  { container.verify_dependencies(:app).should == true }
-    Then  { container.verify_dependencies(:app,:frobosh).should == false }
+    Given {
+      def container.custom_method
+      end
+    }
+    Then  { container.verify_dependencies(:app,:custom_method).should == true }
+    Then  { container.verify_dependencies(:app,:custom_method,:frobosh).should == false }
   end
 end

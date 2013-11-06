@@ -74,7 +74,9 @@ module Dim
 
     # Given a list of services, check to see if they are available, returning true or false.
     def verify_dependencies(*names)
-      names.all? { |name| service_block(name) }
+      names.all? do |name|
+        respond_to?(name) || service_block(name)
+      end
     rescue Dim::MissingServiceError
       false
     end

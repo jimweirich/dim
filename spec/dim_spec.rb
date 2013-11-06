@@ -206,4 +206,10 @@ describe Dim::Container do
       }
     end
   end
+
+  Scenario "verifying dependencies" do
+    Given { container.register(:app) { :app } }
+    Then  { container.verify_dependencies(:app).should == true }
+    Then  { container.verify_dependencies(:app,:frobosh).should == false }
+  end
 end

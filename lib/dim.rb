@@ -72,6 +72,13 @@ module Dim
       register(name,false,&block)
     end
 
+    # Given a list of services, check to see if they are available, returning true or false.
+    def verify_dependencies(*names)
+      names.all? { |name| service_block(name) }
+    rescue Dim::MissingServiceError
+      false
+    end
+
     # Lookup a service from ENV variables, or use a default if given; fall back to searching the container and its parents for a default value
     def register_env(name,default = nil)
       if value = ENV[name.to_s.upcase]
